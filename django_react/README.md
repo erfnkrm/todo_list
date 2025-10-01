@@ -6,15 +6,19 @@ A full-stack todo application built with Django backend and React frontend.
 
 - Create, read, update, and delete todos
 - Filter todos by status (all, active, completed)
-- Todo statistics
+- Real-time todo statistics
 - Responsive design with Tailwind CSS
+- Django REST API backend with SQLite database
+- CORS-enabled for frontend-backend communication
+- Django admin interface for data management
 
 ## Tech Stack
 
-- **Backend**: Django
+- **Backend**: Django, Django REST Framework, SQLite
 - **Frontend**: React, TypeScript, Vite
 - **Styling**: Tailwind CSS
 - **Icons**: Lucide React
+- **State Management**: React hooks with API integration
 
 ## Setup Instructions
 
@@ -68,11 +72,30 @@ In the `front-react` directory:
 
 ## API Endpoints
 
-- `GET /api/todos/` - List all todos
+- `GET /api/todos/` - List all todos (paginated)
 - `POST /api/todos/` - Create a new todo
 - `GET /api/todos/{id}/` - Get a specific todo
-- `PUT /api/todos/{id}/` - Update a todo
+- `PUT /api/todos/{id}/` - Update a todo (full update)
+- `PATCH /api/todos/{id}/` - Partially update a todo
 - `DELETE /api/todos/{id}/` - Delete a todo
+- `GET /api/todos/stats/` - Get todo statistics (total, completed, active)
+
+### Example API Usage
+
+```bash
+# Create a todo
+curl -X POST http://127.0.0.1:8000/api/todos/ \
+  -H "Content-Type: application/json" \
+  -d '{"title": "Learn Django REST Framework", "completed": false}'
+
+# Get all todos
+curl http://127.0.0.1:8000/api/todos/
+
+# Update a todo
+curl -X PATCH http://127.0.0.1:8000/api/todos/1/ \
+  -H "Content-Type: application/json" \
+  -d '{"completed": true}'
+```
 
 ## Contributing
 
