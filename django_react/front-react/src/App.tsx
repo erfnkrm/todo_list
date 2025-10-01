@@ -31,7 +31,7 @@ function App() {
               <CheckSquare className="text-white" size={32} />
             </div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Todo Master
+              Todo List
             </h1>
           </div>
           <p className="text-gray-600 text-lg">
