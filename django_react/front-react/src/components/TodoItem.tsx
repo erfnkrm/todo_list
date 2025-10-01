@@ -1,46 +1,32 @@
 import React, { useState } from 'react';
-import { Check, X, Edit3, Save, Flag } from 'lucide-react';
+import { Check, X, Edit3, Save } from 'lucide-react';
 import { Todo } from '../types/todo';
 
 interface TodoItemProps {
   todo: Todo;
-  onToggle: (id: string) => void;
-  onDelete: (id: string) => void;
-  onUpdate: (id: string, updates: Partial<Pick<Todo, 'text' | 'priority' | 'category'>>) => void;
+  onToggle: (id: number) => void;
+  onDelete: (id: number) => void;
+  onUpdate: (id: number, updates: Partial<Pick<Todo, 'title'>>) => void;
 }
 
 export const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle, onDelete, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [editText, setEditText] = useState(todo.text);
-  const [editPriority, setEditPriority] = useState(todo.priority);
+  const [editTitle, setEditTitle] = useState(todo.title);
 
   const handleSave = () => {
-    if (editText.trim()) {
-      onUpdate(todo.id, { text: editText.trim(), priority: editPriority });
+    if (editTitle.trim()) {
+      onUpdate(todo.id, { title: editTitle.trim() });
       setIsEditing(false);
     }
   };
 
   const handleCancel = () => {
-    setEditText(todo.text);
-    setEditPriority(todo.priority);
+    setEditTitle(todo.title);
     setIsEditing(false);
   };
 
-  const priorityColors = {
-    low: 'border-l-green-400 bg-green-50',
-    medium: 'border-l-yellow-400 bg-yellow-50',
-    high: 'border-l-red-400 bg-red-50'
-  };
-
-  const priorityDots = {
-    low: 'bg-green-400',
-    medium: 'bg-yellow-400',
-    high: 'bg-red-400'
-  };
-
   return (
-    <div className={`group bg-white rounded-xl border-l-4 shadow-sm hover:shadow-md transition-all duration-200 ${priorityColors[todo.priority]} ${todo.completed ? 'opacity-60' : ''}`}>
+    <div className={`group bg-white rounded-xl border-l-4 border-l-blue-400 shadow-sm hover:shadow-md transition-all duration-200 ${todo.completed ? 'opacity-60' : ''}`}>
       <div className="p-4">
         <div className="flex items-center space-x-3">
           <button
@@ -56,48 +42,25 @@ export const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle, onDelete, on
 
           <div className="flex-1 min-w-0">
             {isEditing ? (
-              <div className="space-y-2">
-                <input
-                  type="text"
-                  value={editText}
-                  onChange={(e) => setEditText(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-blue-300 focus:outline-none"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleSave();
-                    if (e.key === 'Escape') handleCancel();
-                  }}
-                  autoFocus
-                />
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-gray-500">Priority:</span>
-                  {(['low', 'medium', 'high'] as const).map((p) => (
-                    <button
-                      key={p}
-                      onClick={() => setEditPriority(p)}
-                      className={`w-3 h-3 rounded-full transition-all duration-200 ${
-                        editPriority === p ? priorityDots[p] : 'bg-gray-200'
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
+              <input
+                type="text"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-blue-300 focus:outline-none"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleSave();
+                  if (e.key === 'Escape') handleCancel();
+                }}
+                autoFocus
+              />
             ) : (
               <div>
                 <p className={`text-gray-800 ${todo.completed ? 'line-through' : ''}`}>
-                  {todo.text}
+                  {todo.title}
                 </p>
                 <div className="flex items-center space-x-3 mt-1">
-                  <div className="flex items-center space-x-1">
-                    <div className={`w-2 h-2 rounded-full ${priorityDots[todo.priority]}`} />
-                    <span className="text-xs text-gray-500 capitalize">{todo.priority}</span>
-                  </div>
-                  {todo.category && (
-                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
-                      {todo.category}
-                    </span>
-                  )}
                   <span className="text-xs text-gray-400">
-                    {todo.createdAt.toLocaleDateString()}
+                    {new Date(todo.created_at).toLocaleDateString()}
                   </span>
                 </div>
               </div>

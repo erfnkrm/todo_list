@@ -16,7 +16,9 @@ function App() {
     deleteTodo,
     updateTodo,
     clearCompleted,
-    stats
+    stats,
+    loading,
+    error
   } = useTodos();
 
   return (
@@ -53,7 +55,18 @@ function App() {
 
             {/* Todo List */}
             <div className="space-y-3">
-              {todos.length === 0 ? (
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                  <p className="text-red-600">{error}</p>
+                </div>
+              )}
+              
+              {loading ? (
+                <div className="text-center py-12">
+                  <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                  <p className="text-gray-600">Loading todos...</p>
+                </div>
+              ) : todos.length === 0 ? (
                 <div className="text-center py-12">
                   <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
                     <CheckSquare className="text-gray-400" size={32} />
@@ -94,7 +107,7 @@ function App() {
               <div className="space-y-3 text-sm text-gray-600">
                 <div className="flex items-start space-x-2">
                   <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0" />
-                  <p>Click the flag icon to set priority and category</p>
+                  <p>Click the plus button to add new todos</p>
                 </div>
                 <div className="flex items-start space-x-2">
                   <div className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0" />

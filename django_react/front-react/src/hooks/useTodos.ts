@@ -1,64 +1,89 @@
 import { useState, useEffect } from 'react';
 import { Todo, TodoStats } from '../types/todo';
-
-const STORAGE_KEY = 'todos-app-data';
+import { apiService } from '../services/api';
 
 export const useTodos = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Load todos from localStorage on mount
+  // Load todos from API on mount
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
+    const loadTodos = async () => {
       try {
-        const parsed = JSON.parse(stored);
-        const todosWithDates = parsed.map((todo: any) => ({
-          ...todo,
-          createdAt: new Date(todo.createdAt)
-        }));
-        setTodos(todosWithDates);
-      } catch (error) {
-        console.error('Failed to parse stored todos:', error);
+        setLoading(true);
+        const response = await apiService.getTodos();
+        setTodos(response.results);
+        setError(null);
+      } catch (err) {
+        console.error('Failed to load todos:', err);
+        setError('Failed to load todos');
+      } finally {
+        setLoading(false);
       }
-    }
+    };
+
+    loadTodos();
   }, []);
 
-  // Save todos to localStorage whenever todos change
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
-  }, [todos]);
-
-  const addTodo = (text: string, priority: Todo['priority'] = 'medium', category?: string) => {
-    const newTodo: Todo = {
-      id: crypto.randomUUID(),
-      text: text.trim(),
-      completed: false,
-      createdAt: new Date(),
-      priority,
-      category
-    };
-    setTodos(prev => [newTodo, ...prev]);
+  const addTodo = async (title: string) => {
+    try {
+      const newTodo = await apiService.createTodo(title.trim());
+      setTodos(prev => [newTodo, ...prev]);
+      setError(null);
+    } catch (err) {
+      console.error('Failed to create todo:', err);
+      setError('Failed to create todo');
+    }
   };
 
-  const toggleTodo = (id: string) => {
-    setTodos(prev => prev.map(todo => 
-      todo.id === id ? { ...todo, completed: !todo.completed } : todo
-    ));
+  const toggleTodo = async (id: number) => {
+    try {
+      const todo = todos.find(t => t.id === id);
+      if (todo) {
+        const updatedTodo = await apiService.updateTodo(id, { completed: !todo.completed });
+        setTodos(prev => prev.map(t => t.id === id ? updatedTodo : t));
+        setError(null);
+      }
+    } catch (err) {
+      console.error('Failed to toggle todo:', err);
+      setError('Failed to update todo');
+    }
   };
 
-  const deleteTodo = (id: string) => {
-    setTodos(prev => prev.filter(todo => todo.id !== id));
+  const deleteTodo = async (id: number) => {
+    try {
+      await apiService.deleteTodo(id);
+      setTodos(prev => prev.filter(todo => todo.id !== id));
+      setError(null);
+    } catch (err) {
+      console.error('Failed to delete todo:', err);
+      setError('Failed to delete todo');
+    }
   };
 
-  const updateTodo = (id: string, updates: Partial<Pick<Todo, 'text' | 'priority' | 'category'>>) => {
-    setTodos(prev => prev.map(todo => 
-      todo.id === id ? { ...todo, ...updates } : todo
-    ));
+  const updateTodo = async (id: number, updates: Partial<Pick<Todo, 'title'>>) => {
+    try {
+      const updatedTodo = await apiService.updateTodo(id, updates);
+      setTodos(prev => prev.map(todo => todo.id === id ? updatedTodo : todo));
+      setError(null);
+    } catch (err) {
+      console.error('Failed to update todo:', err);
+      setError('Failed to update todo');
+    }
   };
 
-  const clearCompleted = () => {
-    setTodos(prev => prev.filter(todo => !todo.completed));
+  const clearCompleted = async () => {
+    try {
+      const completedTodos = todos.filter(todo => todo.completed);
+      await Promise.all(completedTodos.map(todo => apiService.deleteTodo(todo.id)));
+      setTodos(prev => prev.filter(todo => !todo.completed));
+      setError(null);
+    } catch (err) {
+      console.error('Failed to clear completed todos:', err);
+      setError('Failed to clear completed todos');
+    }
   };
 
   const filteredTodos = todos.filter(todo => {
@@ -75,7 +100,7 @@ export const useTodos = () => {
   const stats: TodoStats = {
     total: todos.length,
     completed: todos.filter(todo => todo.completed).length,
-    pending: todos.filter(todo => !todo.completed).length
+    active: todos.filter(todo => !todo.completed).length
   };
 
   return {
@@ -87,6 +112,8 @@ export const useTodos = () => {
     deleteTodo,
     updateTodo,
     clearCompleted,
-    stats
+    stats,
+    loading,
+    error
   };
 };

@@ -36,9 +36,9 @@ export const TodoStats: React.FC<TodoStatsProps> = ({ stats }) => {
         <div className="text-center">
           <div className="flex items-center justify-center space-x-1 mb-1">
             <Circle className="text-blue-500" size={16} />
-            <span className="text-2xl font-bold text-blue-600">{stats.pending}</span>
+            <span className="text-2xl font-bold text-blue-600">{stats.active}</span>
           </div>
-          <p className="text-sm text-gray-600">Pending</p>
+          <p className="text-sm text-gray-600">Active</p>
         </div>
       </div>
 

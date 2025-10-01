@@ -1,14 +1,13 @@
 export interface Todo {
-  id: string;
-  text: string;
+  id: number;
+  title: string;
   completed: boolean;
-  createdAt: Date;
-  priority: 'low' | 'medium' | 'high';
-  category?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface TodoStats {
   total: number;
   completed: number;
-  pending: number;
+  active: number;
 }
